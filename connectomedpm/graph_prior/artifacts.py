@@ -30,6 +30,8 @@ def save_graph(
     manifest: dict,
     mapping: list[dict] | None = None,
     node_modules: list[str] | None = None,
+    steps: int | None = None,
+    config: dict | None = None,
 ) -> Path:
     out_dir = ensure_dir(out_dir)
     np.savez_compressed(
@@ -49,6 +51,8 @@ def save_graph(
             "node_names": node_names,
             "feature_names": feature_names,
             "node_modules": node_modules,
+            "steps": steps,
+            "config": config or {},
             "shapes": {
                 "adjacency": list(np.asarray(adjacency).shape),
                 "transition_in": list(np.asarray(transition_in).shape),
@@ -83,6 +87,8 @@ def load_graph(path: str | Path) -> dict:
         "node_names": meta["node_names"],
         "feature_names": meta["feature_names"],
         "node_modules": meta.get("node_modules"),
+        "steps": meta.get("steps"),
+        "config": meta.get("config") or {},
         "adjacency": data["adjacency"],
         "transition_in": data["transition_in"],
         "transition_out": data["transition_out"],

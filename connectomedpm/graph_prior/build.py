@@ -245,7 +245,7 @@ def build_null_topologies(
                     "provenance": {"derived_from": real["graph_id"],
                                    "null_kind": kind, "seed": null_seed},
                     "adjacency_raw": null_adjacency_raw,
-                    "steps": int(real["steps"]),
+                    "steps": int(real.get("steps") or 2),
                     "config": dict(real["config"]),
                 }
             )

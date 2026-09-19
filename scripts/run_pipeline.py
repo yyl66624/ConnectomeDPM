@@ -55,6 +55,7 @@ from connectomedpm.router.train import TrainConfig, fit_model  # noqa: E402
 from connectomedpm.supervision.candidate_cache import (  # noqa: E402
     DecodingConfig, build_candidate_cache, compute_cache_key, load_cache, save_cache,
 )
+from connectomedpm.supervision.scorer import oracle_report  # noqa: E402
 from connectomedpm.utils.config import load_config  # noqa: E402
 from connectomedpm.utils.io import ensure_dir, read_json, read_jsonl, write_json, write_jsonl  # noqa: E402
 from connectomedpm.utils.logging import get_logger  # noqa: E402
@@ -181,6 +182,7 @@ def stage_graph(cfg: dict, paths: Paths, log) -> dict:
         self_loops=real["self_loops"], node_sizes=real["node_sizes"],
         stats=real["stats"], manifest=manifest,
         mapping=real["coarse_mapping"], node_modules=real["node_modules"],
+        steps=int(real["steps"]), config=real["config"],
     )
     # Raw community-level matrices are kept separately: they are the input the null models
     # need, and they are too large to sit inside the JSON metadata.
@@ -231,9 +233,8 @@ def stage_nulls(cfg: dict, paths: Paths, log) -> dict:
     null_cfg = cfg["_null_cfg"]
     real = load_graph(paths.graphs / "malecns_k32")
     real["adjacency_raw"] = _real_adjacency_raw(paths)
-    real["config"] = {
-        "edge_transform": cfg["graph"]["edge_transform"],
-    }
+    real.setdefault("config", {})
+    real["config"] = {**real["config"], "edge_transform": cfg["graph"]["edge_transform"]}
 
     built: list[str] = []
     for null in build_null_topologies(
@@ -263,6 +264,7 @@ def stage_nulls(cfg: dict, paths: Paths, log) -> dict:
             self_loops=null["self_loops"], node_sizes=null["node_sizes"],
             stats=null["stats"], manifest=manifest,
             mapping=None, node_modules=null["node_modules"],
+            steps=int(null["steps"]), config=null["config"],
         )
         built.append(null["graph_id"])
         log.info("[nulls] built %s edges=%d", null["graph_id"], null["stats"]["n_edges"])
@@ -390,15 +392,18 @@ def _load_candidate_records(paths: Paths) -> list[CandidateRecord]:
 
 def stage_headroom(cfg: dict, paths: Paths, log) -> dict:
     records = _load_candidate_records(paths)
-    report: dict = {"overall": oracle_metrics(records), "per_split": {}, "per_family": {}}
+    # `oracle_report` reports exactly the fields the block-bank gate needs (DEVELOPMENT.md
+    # section 6): base/oracle accuracy, oracle net repair and per-block fix/break counts.
+    report: dict = {"overall": oracle_report(records), "per_split": {}, "per_family": {}}
     for split in ALL_SPLITS:
         rows = [r for r in records if r.split == split]
         if rows:
-            report["per_split"][split] = oracle_metrics(rows)
+            report["per_split"][split] = oracle_report(rows)
     families = sorted({r.task_family for r in records})
     for family in families:
         rows = [r for r in records if r.task_family == family]
-        report["per_family"][family] = oracle_metrics(rows)
+        report["per_family"][family] = oracle_report(rows)
+    report["overall_metrics_view"] = oracle_metrics(records)
 
     gate = report["overall"]
     report["gate"] = {

@@ -1,0 +1,23 @@
+# Synthetic connectome used only for end-to-end smoke tests of the pipeline.
+# Graphs built from this file are labelled `synthetic` and are never reported as MaleCNS.
+release:
+  version: synthetic
+  bucket: none
+  base: none
+  files:
+    weights: connectome-weights-male-cns-synthetic.feather
+    annotations: body-annotations-male-cns-synthetic.feather
+  local_dir: /root/autodl-tmp/data/synth
+
+build:
+  k: 8
+  region_column: superclass
+  region_prefix: cb_
+  status_column: statusLabel
+  excluded_status: [Glia, Out of scope]
+  community_column: supertype
+  module_column: superclass
+  min_community_size: 1
+  edge_transform: log1p
+  steps: 2
+

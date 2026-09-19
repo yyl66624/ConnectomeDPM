@@ -101,3 +101,46 @@ def score_answer(prediction: str, gold: str, family: str = "", tol: float = 1e-6
         return True, 1.0
     return False, 0.0
 
+
+def oracle_report(rows) -> dict:
+    """Oracle headroom over candidate records (DEVELOPMENT.md section 6 block gate).
+
+    Required outputs: base accuracy, oracle accuracy, oracle fixes, oracle breaks, oracle net
+    repair, and per-block fix/break counts. Oracle selection is an upper bound only - it is
+    never a deployable method.
+    """
+    n = len(rows)
+    if n == 0:
+        return {"n": 0, "per_block": {}}
+
+    blocks = sorted({b for r in rows for b in r.actions if b != "base"})
+    base_correct = sum(1 for r in rows if r.base_correct)
+    oracle_correct = base_correct
+    coverage = 0
+
+    for record in rows:
+        if not record.base_correct and any(
+            record.actions[b]["correct"] for b in blocks
+        ):
+            oracle_correct += 1
+            coverage += 1
+
+    per_block: dict[str, dict] = {}
+    for block in blocks:
+        fixes = sum(1 for r in rows if r.label(block) == "FIX")
+        breaks = sum(1 for r in rows if r.label(block) == "BREAK")
+        per_block[block] = {"fixes": fixes, "breaks": breaks, "net": fixes - breaks}
+
+    any_fixes = sum(v["fixes"] for v in per_block.values())
+    any_breaks = sum(v["breaks"] for v in per_block.values())
+    return {
+        "n": n,
+        "base_accuracy": base_correct / n,
+        "oracle_accuracy": oracle_correct / n,
+        "oracle_gain": (oracle_correct - base_correct) / n,
+        "oracle_coverage": coverage,
+        "oracle_net_repair": oracle_correct - base_correct,
+        "any_block_fixes": any_fixes,
+        "any_block_breaks": any_breaks,
+        "per_block": per_block,
+    }

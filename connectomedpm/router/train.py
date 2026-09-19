@@ -128,7 +128,7 @@ def fit_model(
                 [p for p in model.parameters() if p.requires_grad], 5.0
             )
             optimizer.step()
-            total += float(loss) * idx.numel()
+            total += float(loss.detach()) * idx.numel()
             seen += int(idx.numel())
 
         model.eval()
