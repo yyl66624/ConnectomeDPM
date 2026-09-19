@@ -1,0 +1,8 @@
+# Backbone for the pilot. The main run (R09-R12) uses Qwen2.5-1.5B-Instruct.
+name: Qwen2.5-0.5B-Instruct
+path: /root/autodl-tmp/models/Qwen2.5-0.5B-Instruct
+device: auto
+dtype: auto          # bf16 on CUDA, fp32 on CPU
+use_chat_template: true
+revision: local
+

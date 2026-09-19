@@ -1,0 +1,22 @@
+# MaleCNS v1.0 -> K=32 routing nodes (DEVELOPMENT.md section 8).
+release:
+  version: v1.0
+  bucket: gs://flyem-male-cns
+  base: https://storage.googleapis.com/flyem-male-cns/v1.0/connectome-data/flat-connectome
+  files:
+    weights: connectome-weights-male-cns-v1.0-minconf-0.5.feather
+    annotations: body-annotations-male-cns-v1.0-minconf-0.5.feather
+  local_dir: /root/autodl-tmp/data/malecns/v1.0
+
+build:
+  k: 32
+  region_column: superclass        # central brain is encoded as cb_*
+  region_prefix: cb_
+  status_column: statusLabel
+  excluded_status: [Glia, Out of scope]
+  community_column: supertype      # fine cell type -> graph community
+  module_column: superclass        # coarse cell type -> module (for the N3 null)
+  min_community_size: 1
+  edge_transform: log1p
+  steps: 2                         # z = [s, P_in s, P_out s, P_in^2 s, P_out^2 s]
+

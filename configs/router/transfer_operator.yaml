@@ -1,0 +1,24 @@
+# The router is identical for every topology; only the graph changes (section 12).
+steps: 2                 # P_in^1, P_out^1, P_in^2, P_out^2
+temperature: 1.0
+hidden: 128
+dropout: 0.0
+use_node_features: false  # keeps the architecture faithful to section 9
+
+train:
+  epochs: 60
+  batch_size: 128
+  lr: 3.0e-3
+  weight_decay: 1.0e-4
+  early_stopping_patience: 15
+
+loss:
+  class_weights:
+    FIX: 1.0
+    BREAK: 2.0
+    UNCHANGED: 1.0
+
+selection:
+  lambda_break: 1.0
+  gamma_cost: 0.0
+

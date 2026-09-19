@@ -1,0 +1,81 @@
+# H1 pilot (R08): engineering closed loop + first topology comparison at 0.5B scale.
+#
+# This is explicitly a pilot: 1 router seed, 1 null instance per kind. Its job is to find
+# bugs, check direction and estimate variance - never to be quoted as a final result.
+seed: 0
+
+repo_root: .
+paths:
+  data_dir: data
+  graph_dir: experiments/graphs
+  block_dir: experiments/blocks
+  cache_dir: experiments/caches
+  results_dir: experiments/results
+  reports_dir: experiments/reports
+
+model:
+  path: /root/autodl-tmp/models/Qwen2.5-0.5B-Instruct
+  device: auto
+  dtype: auto
+  use_chat_template: true
+
+data:
+  per_template: 24
+  family_overrides: {}
+  dedup_near_threshold: 0.9
+
+graph:
+  k: 32
+  region_column: superclass
+  region_prefix: cb_
+  status_column: statusLabel
+  excluded_status: [Glia, Out of scope]
+  community_column: supertype
+  module_column: superclass
+  min_community_size: 1
+  edge_transform: log1p
+  steps: 2
+
+nulls:
+  seed: 0
+  instances: 1
+  kinds: [no_neighbor, uniform_random, degree_preserving, module_preserving]
+
+blocks:
+  rank: 8
+  scale: 1.0
+  lr: 2.0e-3
+  epochs: 2
+  batch_size: 8
+  max_length: 192
+  seed: 0
+
+cache:
+  max_new_tokens: 24
+  batch_size: 48
+  do_sample: false
+
+router:
+  steps: 2
+  temperature: 1.0
+  hidden: 128
+  dropout: 0.0
+  use_node_features: false
+  train:
+    epochs: 60
+    batch_size: 128
+    lr: 3.0e-3
+    weight_decay: 1.0e-4
+    early_stopping_patience: 15
+  loss:
+    class_weights: {FIX: 1.0, BREAK: 2.0, UNCHANGED: 1.0}
+  selection:
+    lambda_break: 1.0
+    gamma_cost: 0.0
+  seeds: [0]
+
+evaluation:
+  coverages: [0.05, 0.10, 0.20]
+  primary_coverage: 0.10
+  bootstrap: 500
+  calibration_protocol: max_net_repair

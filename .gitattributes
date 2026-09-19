@@ -1,0 +1,12 @@
+# Keep the repository byte-identical across platforms: shell scripts must stay LF so they run
+# on the Linux GPU host, and Python/YAML/Markdown are normalised to LF too.
+* text=auto eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.feather binary
+*.pt binary
+*.npz binary
+*.safetensors binary

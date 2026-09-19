@@ -1,0 +1,9 @@
+# Matched null topologies (DEVELOPMENT.md section 11).
+seed: 0
+instances: 1
+kinds:
+  - no_neighbor          # N0: primary check that edges contribute anything
+  - uniform_random       # N1: weak baseline only
+  - degree_preserving    # N2: in/out degree sequences preserved
+  - module_preserving    # N3: module sizes + block-to-block edge counts preserved
+

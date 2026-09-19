@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "connectomedpm"
+version = "0.1.0"
+description = "Connectome-prior selective parameter correction: a fair, reproducible, auditable comparison platform for real connectome topology vs. strictly matched null topology."
+requires-python = ">=3.10"
+readme = "README.md"
+license = { text = "MIT" }
+
+[tool.setuptools.packages.find]
+include = ["connectomedpm*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+

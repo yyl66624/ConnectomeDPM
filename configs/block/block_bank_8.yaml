@@ -1,0 +1,25 @@
+# Eight blocks over the in-distribution error families (DEVELOPMENT.md section 6).
+#
+# `code_boundary` and `symbolic_manipulation` are held out entirely for OOD evaluation, so no
+# block is trained on them. Blocks are therefore trained on the six ID families, with two
+# families contributing a second block at a different layer/module to reach eight and to add
+# block diversity. Their behaviour on the OOD families is the inductive-transfer measurement.
+rank: 8
+scale: 1.0
+lr: 2.0e-3
+epochs: 2
+batch_size: 8
+max_length: 192
+weight_decay: 0.0
+grad_clip: 1.0
+seed: 0
+
+targets:
+  - {error_family: numerical_arithmetic, layer_id: 20, module_name: down_proj}
+  - {error_family: numerical_arithmetic, layer_id: 18, module_name: down_proj}
+  - {error_family: unit_conversion,      layer_id: 22, module_name: down_proj}
+  - {error_family: format_following,     layer_id: 16, module_name: down_proj}
+  - {error_family: structured_extraction,layer_id: 21, module_name: o_proj}
+  - {error_family: logic_constraint,     layer_id: 19, module_name: down_proj}
+  - {error_family: factual_correction,   layer_id: 23, module_name: down_proj}
+  - {error_family: factual_correction,   layer_id: 17, module_name: o_proj}
